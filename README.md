@@ -4,7 +4,7 @@ A Streamlit web application for guessing when the office rat will go home each d
 
 ## Features
 
-- **Daily Guessing Game**: Three friends (Gaurav, Upanshu, Yatin) guess when the rat will leave
+- **Daily Guessing Game**: Three friends (Honor, Dawn, Pilgrim) guess when the rat will leave
 - **Time Tracking**: Record actual leave time after all guesses are submitted
 - **Live Leaderboard**: Track who makes the most accurate guesses over time
 - **Data Persistence**: All data stored in local `data.json` file

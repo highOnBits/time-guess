@@ -6,18 +6,41 @@ from typing import Dict, List, Optional
 
 # Configuration
 DATA_FILE = "data.json"
-FRIENDS = ["Gaurav", "Upanshu", "Yatin"]
+FRIENDS = ["Honor", "Dawn", "Pilgrim"]
 
 def load_data() -> Dict:
     """Load data from JSON file, create empty structure if file doesn't exist"""
+    # Yesterday's date (2025-07-31)
+    yesterday = "2025-07-31"
+    
+    default_data = {
+        "guesses": [
+            {"date": yesterday, "name": "Honor", "guess_time": "16:10"},
+            {"date": yesterday, "name": "Pilgrim", "guess_time": "16:20"},
+            {"date": yesterday, "name": "Dawn", "guess_time": "16:30"}
+        ], 
+        "actual_times": [
+            {"date": yesterday, "actual_time": "16:10"}
+        ],
+        "initial_scores": {"Honor": 0, "Dawn": 0, "Pilgrim": 0}
+    }
+    
     if not os.path.exists(DATA_FILE):
-        return {"guesses": [], "actual_times": []}
+        # Create initial data file with existing scores
+        save_data(default_data)
+        return default_data
     
     try:
         with open(DATA_FILE, 'r') as f:
-            return json.load(f)
+            data = json.load(f)
+            # Ensure initial_scores exists in loaded data
+            if "initial_scores" not in data:
+                data["initial_scores"] = {"Honor": 0, "Dawn": 0, "Pilgrim": 0}
+                save_data(data)
+            return data
     except (json.JSONDecodeError, FileNotFoundError):
-        return {"guesses": [], "actual_times": []}
+        save_data(default_data)
+        return default_data
 
 def save_data(data: Dict) -> None:
     """Save data to JSON file"""
@@ -49,7 +72,8 @@ def time_to_minutes(time_str: str) -> int:
 
 def calculate_leaderboard(data: Dict) -> Dict[str, int]:
     """Calculate leaderboard showing wins for each friend across all days"""
-    wins = {friend: 0 for friend in FRIENDS}
+    # Start with initial scores
+    wins = data.get("initial_scores", {friend: 0 for friend in FRIENDS}).copy()
     
     # Group data by date
     dates_with_complete_data = set()
@@ -169,6 +193,17 @@ def main():
         for guess in sorted(today_guesses, key=lambda x: x["name"]):
             st.write(f"• **{guess['name']}**: {guess['guess_time']}")
     
+    # Always show leaderboard
+    st.header("📊 Overall Leaderboard")
+    leaderboard = calculate_leaderboard(data)
+    
+    # Sort by wins (descending)
+    sorted_leaderboard = sorted(leaderboard.items(), key=lambda x: x[1], reverse=True)
+    
+    for i, (friend, wins) in enumerate(sorted_leaderboard):
+        emoji = "👑" if i == 0 else "🏅" if i == 1 else "🎖️"
+        st.write(f"{emoji} **{friend}**: {wins} wins")
+    
     # Section 2: Actual Time Input (only show when all 3 friends have guessed)
     if len(today_guesses) == 3 and today_actual is None:
         st.header("⏰ Actual Leave Time")
@@ -227,16 +262,7 @@ def main():
             diff_str = f"{hours}h {mins}m" if hours > 0 else f"{mins}m"
             st.write(f"{emoji} **{result['name']}**: {result['guess']} (off by {diff_str})")
         
-        # Overall Leaderboard
-        st.header("📊 Overall Leaderboard")
-        leaderboard = calculate_leaderboard(data)
-        
-        # Sort by wins (descending)
-        sorted_leaderboard = sorted(leaderboard.items(), key=lambda x: x[1], reverse=True)
-        
-        for i, (friend, wins) in enumerate(sorted_leaderboard):
-            emoji = "👑" if i == 0 else "🏅" if i == 1 else "🎖️"
-            st.write(f"{emoji} **{friend}**: {wins} wins")
+
     
     # Reset button
     st.header("🔄 Reset")
