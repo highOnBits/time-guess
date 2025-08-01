@@ -102,10 +102,13 @@ def calculate_leaderboard(data: Dict) -> Dict[str, int]:
             diff = abs(actual_minutes - guess_minutes)
             differences[guess["name"]] = diff
         
-        # Find the winner (closest guess)
+        # Find all winners (closest guess - handle ties)
         if differences:
-            winner = min(differences.keys(), key=lambda x: differences[x])
-            wins[winner] += 1
+            min_difference = min(differences.values())
+            winners = [name for name, diff in differences.items() if diff == min_difference]
+            # Award 1 point to each person with the closest guess
+            for winner in winners:
+                wins[winner] += 1
     
     return wins
 
