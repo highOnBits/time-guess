@@ -133,8 +133,8 @@ def main():
     today_guesses = get_today_guesses(data)
     today_actual = get_today_actual_time(data)
     
-    # Main headline - show only on first visit of the day
-    if len(today_guesses) == 0 and today_actual is None:
+    # Main headline - show until all three guesses are submitted
+    if len(today_guesses) < 3:
         st.title("🐭 When will the rat go home today?")
     else:
         st.title("🐭 Rat Office Time Guess")
