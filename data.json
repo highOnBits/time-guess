@@ -1,0 +1,49 @@
+{
+  "guesses": [
+    {
+      "date": "2025-07-31",
+      "name": "Honor",
+      "guess_time": "16:10"
+    },
+    {
+      "date": "2025-07-31",
+      "name": "Pilgrim",
+      "guess_time": "16:20"
+    },
+    {
+      "date": "2025-07-31",
+      "name": "Dawn",
+      "guess_time": "16:30"
+    },
+    {
+      "date": "2025-08-02",
+      "name": "Pilgrim",
+      "guess_time": "14:30"
+    },
+    {
+      "date": "2025-08-02",
+      "name": "Honor",
+      "guess_time": "15:00"
+    },
+    {
+      "date": "2025-08-02",
+      "name": "Dawn",
+      "guess_time": "13:00"
+    }
+  ],
+  "actual_times": [
+    {
+      "date": "2025-07-31",
+      "actual_time": "16:10"
+    },
+    {
+      "date": "2025-08-02",
+      "actual_time": "14:23"
+    }
+  ],
+  "initial_scores": {
+    "Honor": 0,
+    "Dawn": 0,
+    "Pilgrim": 0
+  }
+}
