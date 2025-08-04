@@ -383,8 +383,8 @@ def main():
             st.write(f"**Total actual times:** {len(data['actual_times'])}")
             
             # Show raw data for debugging
-            with st.expander("Raw Data (Debug)"):
-                st.json(data)
+            st.write("**Raw Data (Debug):**")
+            st.json(data)
         else:
             st.write("Data file will be created on first use")
         
