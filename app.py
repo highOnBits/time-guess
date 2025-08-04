@@ -4,6 +4,7 @@ import os
 from datetime import datetime, date, time
 from typing import Dict, List, Optional
 import time as time_module
+import pytz
 
 # Configuration
 # Use absolute path to ensure data.json is always in the same directory as app.py
@@ -89,24 +90,32 @@ def time_to_minutes(time_str: str) -> int:
     except:
         return 0
 
+def get_eastern_time() -> datetime:
+    """Get current time in Eastern timezone (handles EST/EDT automatically)"""
+    eastern = pytz.timezone('US/Eastern')
+    return datetime.now(eastern)
+
 def is_guess_deadline_passed() -> bool:
-    """Check if the 12:00 PM deadline for guesses has passed today"""
-    now = datetime.now()
-    deadline = datetime.combine(now.date(), time(12, 0))  # 12:00 PM today
-    return now >= deadline
+    """Check if the 12:00 PM EST/EDT deadline for guesses has passed today"""
+    now_eastern = get_eastern_time()
+    # Create deadline at 12:00 PM Eastern time for today
+    deadline_eastern = now_eastern.replace(hour=12, minute=0, second=0, microsecond=0)
+    return now_eastern >= deadline_eastern
 
 def get_time_until_deadline() -> Dict[str, int]:
-    """Get time remaining until 12:00 PM deadline"""
-    now = datetime.now()
-    deadline = datetime.combine(now.date(), time(12, 0))  # 12:00 PM today
+    """Get time remaining until 12:00 PM EST/EDT deadline"""
+    now_eastern = get_eastern_time()
+    # Create deadline at 12:00 PM Eastern time for today
+    deadline_eastern = now_eastern.replace(hour=12, minute=0, second=0, microsecond=0)
     
-    if now >= deadline:
+    if now_eastern >= deadline_eastern:
         return {"hours": 0, "minutes": 0, "seconds": 0, "passed": True}
     
-    time_diff = deadline - now
-    hours = time_diff.seconds // 3600
-    minutes = (time_diff.seconds % 3600) // 60
-    seconds = time_diff.seconds % 60
+    time_diff = deadline_eastern - now_eastern
+    total_seconds = int(time_diff.total_seconds())
+    hours = total_seconds // 3600
+    minutes = (total_seconds % 3600) // 60
+    seconds = total_seconds % 60
     
     return {"hours": hours, "minutes": minutes, "seconds": seconds, "passed": False}
 
@@ -198,17 +207,19 @@ def main():
     else:
         st.title("🐭 Rat Office Time Guess")
     
-    # Show current date and countdown timer
+    # Show current date and Eastern time
+    eastern_time = get_eastern_time()
     st.write(f"**Date:** {get_today_string()}")
+    st.write(f"**Current Eastern Time:** {eastern_time.strftime('%I:%M:%S %p %Z')}")
     
     # Show countdown timer
     deadline_info = get_time_until_deadline()
     if not deadline_info["passed"]:
-        st.info(f"⏰ **Time left to submit guesses:** {deadline_info['hours']:02d}:{deadline_info['minutes']:02d}:{deadline_info['seconds']:02d}")
+        st.info(f"⏰ **Time left to submit guesses (until 12:00 PM EST/EDT):** {deadline_info['hours']:02d}:{deadline_info['minutes']:02d}:{deadline_info['seconds']:02d}")
         # Note: Removed auto-refresh to prevent data persistence issues
         # Users can manually refresh to update the timer
     else:
-        st.warning("🚫 **Guess deadline has passed** (12:00 PM). No more guesses can be submitted today.")
+        st.warning("🚫 **Guess deadline has passed** (12:00 PM EST/EDT). No more guesses can be submitted today.")
     
     # Section 1: Friend Guesses
     st.header("📝 Submit Your Guess")
@@ -252,7 +263,7 @@ def main():
                     except ValueError:
                         st.error(f"Invalid time format. Please use HH:MM format.")
     else:
-        st.write("⏰ **Guess submission deadline has passed for today.**")
+        st.write("⏰ **Guess submission deadline has passed for today (12:00 PM EST/EDT).**")
     
     # Show current guesses
     if today_guesses:
@@ -335,7 +346,7 @@ def main():
     st.header("🔄 Reset Options")
     
     if not deadline_passed:
-        st.write("**Individual Reset** (before 12:00 PM deadline):")
+        st.write("**Individual Reset** (before 12:00 PM EST/EDT deadline):")
         
         # Individual reset buttons
         cols = st.columns(len(FRIENDS))
